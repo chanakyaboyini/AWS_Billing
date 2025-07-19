@@ -4,7 +4,7 @@ pipeline {
   environment {
     AWS_REGION      = 'us-east-1'
     AWS_CRED_ID     = 'jenkins-aws-start-stop'
-    RECIPIENT_EMAIL = 'arra.priyanka03@gmail.com'
+    RECIPIENT_EMAIL = 'arrapriyanka03@gmail.com'
   }
 
   stages {
