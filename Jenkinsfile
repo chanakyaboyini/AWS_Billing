@@ -4,7 +4,6 @@ pipeline {
   environment {
     AWS_REGION      = 'us-east-1'
     AWS_CRED_ID     = 'jenkins-aws-start-stop'
-    RECIPIENT_EMAIL = 'arrapriyanka03@gmail.com'
   }
 
   stages {
@@ -48,22 +47,23 @@ pipeline {
       }
     }
 
-    stage('Email Report') {
+    stage('Slack Notification') {
       steps {
-        script {
-          def body = readFile('aws-cost-usage.txt')
-          mail to: RECIPIENT_EMAIL,
-               subject: "AWS Cost & EC2 Usage: ${START_DATE} → ${END_DATE}",
-               body: """\
-Hello,
+        withCredentials([string(credentialsId: 'slack-webhook', variable: 'SLACK_WEBHOOK')]) {
+          script {
+            def message = readFile('aws-cost-usage.txt').replaceAll('\\n', '\n> ') // blockquote format
+            def payload = """{
+              "text": "*📊 AWS Cost & Usage Report* (${START_DATE} → ${END_DATE})\\n> ${message}"
+            }"""
+            writeFile file: 'slack-message.json', text: payload
 
-Here is your AWS cost and usage summary for ${START_DATE} through ${END_DATE}:
-
-${body}
-
-Regards,
-Jenkins Billing Bot
-"""
+            sh """
+              curl -X POST -H 'Content-type: application/json' \\
+                   --data @slack-message.json \\
+                   "$SLACK_WEBHOOK"
+            """
+            echo "Posted billing report to Slack"
+          }
         }
       }
     }
@@ -71,7 +71,7 @@ Jenkins Billing Bot
 
   post {
     always {
-      echo "Pipeline finished. Check your inbox: ${RECIPIENT_EMAIL}"
+      echo "Pipeline finished. Slack notification sent."
     }
   }
 }
