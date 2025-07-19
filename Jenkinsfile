@@ -3,7 +3,7 @@ pipeline {
 
   environment {
     AWS_REGION      = 'us-east-1'
-    AWS_CRED_ID     = 'jenkins-aws-start-stop'    
+    AWS_CRED_ID     = 'jenkins-aws-start-stop'
     RECIPIENT_EMAIL = 'arra.priyanka03@gmail.com'
   }
 
@@ -29,14 +29,14 @@ pipeline {
           script {
             def report = sh(
               script: """
-               aws ce get-cost-and-usage \
-                --time-period Start=${START_DATE},End=${END_DATE} \
-                --granularity MONTHLY \
-                --metrics UNBLENDED_COST,USAGE_QUANTITY \
-                --group-by Type=DIMENSION,Key=SERVICE \
-                --region ${AWS_REGION} \
-                --output table
-
+                aws ce get-cost-and-usage \\
+                  --time-period Start=${START_DATE},End=${END_DATE} \\
+                  --granularity MONTHLY \\
+                  --metrics UNBLENDED_COST \\
+                  --metrics USAGE_QUANTITY \\
+                  --group-by Type=DIMENSION,Key=SERVICE \\
+                  --region ${AWS_REGION} \\
+                  --output table
               """,
               returnStdout: true
             ).trim()
@@ -52,9 +52,9 @@ pipeline {
       steps {
         script {
           def body = readFile('aws-cost-usage.txt')
-          mail to:      RECIPIENT_EMAIL,
+          mail to: RECIPIENT_EMAIL,
                subject: "AWS Cost & EC2 Usage: ${START_DATE} → ${END_DATE}",
-               body:    """\
+               body: """\
 Hello,
 
 Here is your AWS cost and usage summary for ${START_DATE} through ${END_DATE}:
