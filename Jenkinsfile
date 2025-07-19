@@ -29,13 +29,14 @@ pipeline {
           script {
             def report = sh(
               script: """
-                aws ce get-cost-and-usage \
-                  --time-period Start=${START_DATE},End=${END_DATE} \
-                  --granularity MONTHLY \
-                  --metrics UnblendedCost,UsageQuantity \
-                  --group-by Type=DIMENSION,Key=SERVICE \
-                  --region ${AWS_REGION} \
-                  --output table
+               aws ce get-cost-and-usage \
+                --time-period Start=${START_DATE},End=${END_DATE} \
+                --granularity MONTHLY \
+                --metrics UNBLENDED_COST,USAGE_QUANTITY \
+                --group-by Type=DIMENSION,Key=SERVICE \
+                --region ${AWS_REGION} \
+                --output table
+
               """,
               returnStdout: true
             ).trim()
